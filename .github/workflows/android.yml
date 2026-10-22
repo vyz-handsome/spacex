@@ -15,8 +15,14 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npx cap add android
-      - name: Kunci landscape
-        run: sed -i 's/<activity /<activity android:screenOrientation="sensorLandscape" /' android/app/src/main/AndroidManifest.xml
+      - name: Kunci landscape + fullscreen
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's/<activity/<activity android:screenOrientation="sensorLandscape"/' $M
+          S=android/app/src/main/res/values/styles.xml
+          sed -i 's#<style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">#&\n<item name="android:windowFullscreen">true</item>\n<item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>#' $S
+          grep -n "screenOrientation" $M
+          grep -n "windowFullscreen" $S
       - run: npx cap sync android
       - name: Build APK
         run: cd android && chmod +x gradlew && ./gradlew assembleDebug

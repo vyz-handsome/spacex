@@ -9,31 +9,71 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",sans-serif;touch-action:none}
 #game,#game canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
-#hud{position:fixed;top:max(10px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));display:none;align-items:center;gap:18px;font-size:20px;font-weight:700;text-shadow:0 0 8px #000}
-#hud .hearts{color:var(--red);letter-spacing:4px}
-#hud .dim{opacity:.35}
-.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(3,5,13,.55)}
+#hud{position:fixed;top:max(8px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));display:none;flex-direction:column;gap:2px;font-weight:700;text-shadow:0 0 8px #000;pointer-events:none}
+#hud .r{display:flex;align-items:center;gap:18px;font-size:20px}
+#hud .hearts{color:var(--red);letter-spacing:4px}#hud .dim{opacity:.35}
+#buffs{font-size:13px;color:var(--amber);min-height:16px}
+body.ingame #hud{display:flex}
+#gear{position:fixed;top:max(8px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));width:46px;height:46px;border-radius:50%;border:2px solid rgba(232,241,255,.5);background:rgba(3,5,13,.5);color:var(--ink);font-size:24px;cursor:pointer;z-index:30}
+#bossbar{position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(36vw,360px);height:14px;border:2px solid var(--red);border-radius:8px;display:none;overflow:hidden;background:rgba(0,0,0,.5)}
+#bossbar u{display:block;height:100%;width:100%;background:var(--red);text-decoration:none}
+#ult{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));width:96px;height:96px;border-radius:50%;border:3px solid #6b7690;background:rgba(3,5,13,.6);color:#8b95ad;display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:18px;font-weight:900;cursor:pointer;z-index:20}
+body.ingame #ult{display:flex}
+#ult.ready{border-color:var(--amber);color:var(--amber);box-shadow:0 0 22px rgba(255,179,71,.6);background:rgba(255,179,71,.15)}
+#ult i{display:block;width:60px;height:6px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}
+#ult u{display:block;height:100%;width:0;background:var(--amber)}
+#joy{position:fixed;left:0;bottom:0;width:45%;height:65%;display:none;touch-action:none;z-index:10}
+body.ingame.joy #joy{display:block}
+#joy .base,#joy .knob{position:absolute;border-radius:50%;transform:translate(-50%,-50%);display:none;pointer-events:none}
+#joy .base{width:130px;height:130px;border:2px solid rgba(77,225,255,.5);background:rgba(77,225,255,.08)}
+#joy .knob{width:58px;height:58px;background:rgba(77,225,255,.45)}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(3,5,13,.55)}
 .screen.on{display:flex}
+#settings{z-index:40;background:rgba(3,5,13,.88)}
 h1{font-size:clamp(40px,10vw,84px);letter-spacing:.12em;color:var(--cyan);text-shadow:0 0 24px rgba(77,225,255,.55)}
+h2{font-size:26px;color:var(--cyan)}
 .play{width:104px;height:104px;border-radius:50%;border:3px solid var(--cyan);background:rgba(77,225,255,.12);color:var(--cyan);font-size:48px;padding-left:8px;cursor:pointer}
-.play:active{background:rgba(77,225,255,.35)}
 .btn{padding:12px 26px;border-radius:10px;border:2px solid var(--cyan);background:transparent;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
 .btn.main{background:var(--cyan);color:#03121a}
-.row{display:flex;gap:14px}
+.row{display:flex;gap:14px;align-items:center}
 .stats{display:grid;grid-template-columns:auto auto;gap:6px 28px;font-size:20px}
 .stats b{text-align:right;color:var(--amber)}
-#count{position:fixed;inset:0;display:none;align-items:center;justify-content:center;font-size:clamp(90px,24vw,200px);font-weight:900;color:var(--amber);text-shadow:0 0 30px rgba(255,179,71,.6);pointer-events:none}
+.set{display:grid;grid-template-columns:110px auto;gap:10px 18px;align-items:center;font-size:18px}
+.seg{display:flex;border:2px solid #44506b;border-radius:10px;overflow:hidden}
+.seg button{padding:8px 16px;background:transparent;border:0;color:var(--ink);font-size:16px;cursor:pointer}
+.seg button.act{background:var(--cyan);color:#03121a;font-weight:700}
+#count{position:fixed;inset:0;display:none;align-items:center;justify-content:center;font-size:clamp(90px,24vw,200px);font-weight:900;color:var(--amber);text-shadow:0 0 30px rgba(255,179,71,.6);pointer-events:none;z-index:25}
+#danger{position:fixed;inset:0;display:none;pointer-events:none;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 50%,rgba(255,0,30,0) 30%,rgba(255,0,30,.6) 100%);animation:pulse .45s infinite alternate;z-index:22}
+#danger.on{display:flex}
+#danger b{font-size:clamp(48px,12vw,120px);color:var(--red);letter-spacing:.2em;text-shadow:0 0 30px #f00}
+#danger i{position:absolute;right:0;top:0;bottom:0;width:10px;background:var(--red);box-shadow:0 0 24px 8px #f00}
+@keyframes pulse{from{opacity:.4}to{opacity:1}}
 </style>
 </head>
 <body>
 <div id="game"></div>
-<div id="hud"><span id="score">0</span><span id="time">00:00</span><span class="hearts" id="hearts"></span></div>
+<div id="hud"><div class="r"><span id="score">0</span><span id="time">00:00</span><span class="hearts" id="hearts"></span></div><div id="buffs"></div></div>
+<div id="bossbar"><u id="bossFill"></u></div>
+<button id="gear" aria-label="Settings">&#9881;</button>
+<div id="joy"><div class="base" id="jBase"></div><div class="knob" id="jKnob"></div></div>
+<button id="ult"><span id="ultN"></span><i><u id="ultBar"></u></i></button>
 <div id="count"></div>
-<div class="screen on" id="menu"><h1>SPACE X</h1><button class="play" id="playBtn" aria-label="Main">&gt;</button></div>
+<div id="danger"><i></i><b>DANGER</b></div>
+<div class="screen on" id="menu"><h1>SPACE X</h1><button class="play" id="playBtn" aria-label="Play">&gt;</button></div>
 <div class="screen" id="over">
   <h1 id="overTitle" style="font-size:clamp(32px,7vw,56px)"></h1>
   <div class="stats" id="stats"></div>
   <div class="row"><button class="btn main" id="againBtn"></button><button class="btn" id="menuBtn"></button></div>
+</div>
+<div class="screen" id="settings">
+  <h2 data-i="settings"></h2>
+  <div class="set">
+    <span data-i="audio"></span><div class="seg" data-key="audio"><button data-v="true" data-i="on"></button><button data-v="false" data-i="off"></button></div>
+    <span data-i="quality"></span><div class="seg" data-key="quality"><button data-v="low" data-i="low"></button><button data-v="mid" data-i="mid"></button><button data-v="high" data-i="high"></button></div>
+    <span data-i="ctrl"></span><div class="seg" data-key="ctrl"><button data-v="key" data-i="key"></button><button data-v="joy" data-i="joy"></button><button data-v="drag" data-i="drag"></button></div>
+    <span data-i="lang"></span><div class="seg" data-key="lang"><button data-v="id">Indonesia</button><button data-v="en">English</button></div>
+  </div>
+  <button class="btn main" id="closeSet" data-i="close"></button>
 </div>
 <script type="module" src="/src/main.js"></script>
 </body>
