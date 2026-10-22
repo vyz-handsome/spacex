@@ -14,6 +14,13 @@ const T = {
 const tr = k => T[cfg.lang][k];
 const QM = { low: { m: .35, dpr: 1 }, mid: { m: .7, dpr: 1.5 }, high: { m: 1.2, dpr: 2 } };
 const Q = () => QM[cfg.quality];
+// inset poni/kamera (dikirim dari Android lewat MainActivity)
+const ins = { l: 0, t: 0, r: 0, b: 0 };
+window.setInsets = (l, t, r, b) => {
+  Object.assign(ins, { l, t, r, b }); const s = document.documentElement.style;
+  s.setProperty('--sal', l + 'px'); s.setProperty('--sat', t + 'px'); s.setProperty('--sar', r + 'px'); s.setProperty('--sab', b + 'px');
+};
+if (window.__ins) window.setInsets(...window.__ins);
 
 // ================= AUDIO (sintetis) =================
 let ac = null, master, sfxG, musG, step = 0;
@@ -165,7 +172,7 @@ function clearAll() {
   $('bossbar').style.display = 'none'; $('danger').classList.remove('on');
 }
 function startRun() {
-  initAudio(); clearAll(); resetStats(); ship.position.set(-VW / 2 + 1.6, 0, 0); target = null;
+  initAudio(); clearAll(); resetStats(); ship.position.set(-VW / 2 + 1.6 + ins.l / innerWidth * VW, 0, 0); target = null;
   $('menu').classList.remove('on'); $('over').classList.remove('on'); document.body.classList.add('ingame');
   state = 'count'; cdT = 3; hud();
 }
@@ -245,7 +252,7 @@ function pickBuff(b) {
 }
 function destroyRock(r, drop) {
   r.dead = true; explode(r.m.position.x, r.m.position.y, r.t); score += r.t.pts;
-  if (drop && Math.random() < .35) dropBuff(r.m.position.x, r.m.position.y);
+  if (drop && Math.random() < .10) dropBuff(r.m.position.x, r.m.position.y);
 }
 function makeBoss() {
   const g = new THREE.Group(), wall = new THREE.Mesh(new THREE.BoxGeometry(1.4, VH + 2, 1), mat(0x2b3550, 0x050810));
@@ -253,7 +260,7 @@ function makeBoss() {
   for (let i = -4; i <= 4; i++) { const s = new THREE.Mesh(new THREE.BoxGeometry(1.5, .18, 1.1), mat(0x111827, 0x3a0a14)); s.position.y = i * VH / 8.5; g.add(s); }
   const core = new THREE.Mesh(new THREE.IcosahedronGeometry(.8, 1), new THREE.MeshStandardMaterial({ color: 0xff3b4d, emissive: 0xff1f33, emissiveIntensity: 1.2, flatShading: true }));
   core.position.set(-.75, 0, .5); g.add(core);
-  const max = Math.ceil(20 * 1.5 ** bossSpawned); bossSpawned++;
+  const max = Math.ceil(60 * 1.5 ** bossSpawned); bossSpawned++;
   g.position.set(VW / 2 + .7, 0, 0); scene.add(g);
   boss = { g, wall, core, hp: max, max, flash: 0 }; $('bossbar').style.display = 'block'; cache.bw = -1;
 }
@@ -293,7 +300,7 @@ function update(dt) {
   const l = Math.hypot(dx, dy);
   if (l > .05) { const s = 7 * Math.min(1, l) / l; p.x += dx * s * dt; p.y += dy * s * dt; }
   else if (target) { const f = Math.min(1, 14 * dt); p.x += (target.x - p.x) * f; p.y += (target.y - p.y) * f; }
-  p.x = THREE.MathUtils.clamp(p.x, -VW / 2 + .9, VW / 2 - .9); p.y = THREE.MathUtils.clamp(p.y, -VH / 2 + .8, VH / 2 - .8);
+  p.x = THREE.MathUtils.clamp(p.x, -VW / 2 + .9 + ins.l / innerWidth * VW, VW / 2 - .9 - ins.r / innerWidth * VW); p.y = THREE.MathUtils.clamp(p.y, -VH / 2 + .8, VH / 2 - .8);
   ship.visible = invuln <= 0 || Math.floor(invuln * 10) % 2 === 0; shieldM.visible = shield;
   flame.scale.x = .8 + Math.random() * .5;
 
@@ -302,7 +309,7 @@ function update(dt) {
   const diffS = 1.02 ** bossKills, diffN = 1.05 ** bossKills, base = (VW + 3) / 8 * diffS;
   spawnT -= dt;
   if (spawnT <= 0) {
-    spawnT = 1 / diffN;
+    spawnT = 1 / (diffN * 1.25);
     const t = bossKills >= 3 && Math.random() < .12 ? PUSHER : pickType();
     const m = new THREE.Mesh(t.sp ? pushGeo : rockGeo, new THREE.MeshStandardMaterial({ color: t.c, flatShading: true, roughness: .9, emissive: t.sp ? 0x3a1060 : 0x000000 }));
     m.scale.setScalar(t.r); m.position.set(VW / 2 + 1.5, (Math.random() - .5) * (VH - 1.6), 0); scene.add(m);

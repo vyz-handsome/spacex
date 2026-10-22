@@ -21,6 +21,57 @@ jobs:
           sed -i 's/<activity/<activity android:screenOrientation="sensorLandscape"/' $M
           S=android/app/src/main/res/values/styles.xml
           sed -i 's#<style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">#&\n<item name="android:windowFullscreen">true</item>\n<item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>#' $S
+          S=android/app/src/main/res/values/styles.xml
+          sed -i 's#<style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">#&\n<item name="android:windowBackground">@android:color/black</item>#' $S
+          cat > android/app/src/main/java/com/senxvv/spacex/MainActivity.java <<'JAVA'
+          package com.senxvv.spacex;
+
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.os.Handler;
+          import android.os.Looper;
+          import android.view.Window;
+          import android.view.WindowManager;
+          import androidx.core.graphics.Insets;
+          import androidx.core.view.ViewCompat;
+          import androidx.core.view.WindowCompat;
+          import androidx.core.view.WindowInsetsCompat;
+          import androidx.core.view.WindowInsetsControllerCompat;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+            private float l = 0, t = 0, r = 0, b = 0;
+            private final Handler h = new Handler(Looper.getMainLooper());
+
+            private void push() {
+              if (getBridge() == null || getBridge().getWebView() == null) return;
+              final String js = "window.__ins=[" + l + "," + t + "," + r + "," + b + "];window.setInsets&&window.setInsets(" + l + "," + t + "," + r + "," + b + ")";
+              getBridge().getWebView().evaluateJavascript(js, null);
+            }
+
+            @Override
+            public void onCreate(Bundle s) {
+              super.onCreate(s);
+              Window w = getWindow();
+              WindowCompat.setDecorFitsSystemWindows(w, false);
+              WindowManager.LayoutParams lp = w.getAttributes();
+              if (Build.VERSION.SDK_INT >= 30) lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+              else if (Build.VERSION.SDK_INT >= 28) lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+              w.setAttributes(lp);
+              WindowInsetsControllerCompat c = WindowCompat.getInsetsController(w, w.getDecorView());
+              c.hide(WindowInsetsCompat.Type.systemBars());
+              c.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+              ViewCompat.setOnApplyWindowInsetsListener(w.getDecorView(), (v, insets) -> {
+                Insets ci = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
+                float d = getResources().getDisplayMetrics().density;
+                l = ci.left / d; t = ci.top / d; r = ci.right / d; b = ci.bottom / d;
+                push();
+                return insets;
+              });
+              for (int i = 1; i <= 8; i++) h.postDelayed(this::push, i * 600L);
+            }
+          }
+          JAVA
           grep -n "screenOrientation" $M
           grep -n "windowFullscreen" $S
       - run: npx cap sync android
