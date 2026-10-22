@@ -101,10 +101,10 @@ ship.rotation.x = .35; scene.add(ship);
 
 // batu
 const TYPES = [
-  { hp: 1, r: .35, c: 0x8a8f99, pts: 10, w: 50, d: [['dmg', .03]] }, { hp: 2, r: .5, c: 0xb08968, pts: 25, w: 28, d: [['dmg', .03]] },
-  { hp: 4, r: .7, c: 0xe07a3f, pts: 50, w: 15, d: [['s3', .06]] }, { hp: 7, r: .95, c: 0xd62839, pts: 70, w: 7, d: [['s5', .03], ['rate', .10]] }
+  { hp: 1, r: .35, c: 0x8a8f99, pts: 10, w: 50, d: [['dmg', .05]] }, { hp: 2, r: .5, c: 0xb08968, pts: 25, w: 28, d: [['dmg', .05]] },
+  { hp: 4, r: .7, c: 0xe07a3f, pts: 50, w: 15, d: [['s3', .09]] }, { hp: 7, r: .95, c: 0xd62839, pts: 70, w: 7, d: [['s5', .04], ['rate', .14]] }
 ];
-const PUSHER = { hp: 5, r: .62, c: 0xb14dff, pts: 100, sp: true, d: [['shield', .03]] };
+const PUSHER = { hp: 5, r: .62, c: 0xb14dff, pts: 100, sp: true, d: [['shield', .04]] };
 const rockGeo = new THREE.IcosahedronGeometry(1, 1);
 { const p = rockGeo.attributes.position; for (let i = 0; i < p.count; i++) { const k = .82 + Math.random() * .36; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); } rockGeo.computeVertexNormals(); }
 const pushGeo = new THREE.OctahedronGeometry(1, 0);
@@ -130,7 +130,7 @@ const explode = (x, y, t) => { burst(x, y, t.c, 22, 5); burst(x, y, 0xffd27a, 14
 // buff
 const BUFFS = [{ k: 'dmg', c: 0xffa133, w: 60 }, { k: 'rate', c: 0x5dff8a, w: 40 }, { k: 's3', c: 0x4de1ff, w: 25 }, { k: 's5', c: 0xc77dff, w: 10 }, { k: 'shield', c: 0xdfe8ff, w: 3 }];
 const BUFF_W = BUFFS.reduce((a, b) => a + b.w, 0);
-const DMG_STEP = 1.10, RATE_STEP = 1.075, SIDE_DIV = 5, PUSH_TAKE = .7, PUSH_DASH = 10;
+const DMG_ADD = .10, RATE_ADD = .075, SIDE_DIV = 5, PUSH_TAKE = .7, PUSH_DASH = 10;
 const orbGeo = new THREE.SphereGeometry(.28, 14, 10), halGeo = new THREE.TorusGeometry(.42, .03, 6, 20);
 
 // peluru
@@ -157,8 +157,8 @@ function hud() {
   put('time', String(Math.floor(time / 60)).padStart(2, '0') + ':' + String(Math.floor(time % 60)).padStart(2, '0'));
   const h = Math.max(hp, 0); put('hearts', '\u2665'.repeat(h) + '<span class="dim">' + '\u2665'.repeat(3 - h) + '</span>', true);
   const b = [];
-  if (nDmg) b.push(`${tr('dmg')} \u00d7${(DMG_STEP ** nDmg).toFixed(2)}`);
-  if (nRate) b.push(`${tr('rate')} +${Math.round((RATE_STEP ** nRate - 1) * 100)}%`);
+  if (nDmg) b.push(`${tr('dmg')} +${(DMG_ADD * nDmg).toFixed(2)}`);
+  if (nRate) b.push(`${tr('rate')} +${+(RATE_ADD * nRate * 100).toFixed(1)}%`);
   if (shots > 1) b.push(`${shots} ${tr('shots')}`);
   if (shield) b.push(tr('shield'));
   put('buffs', b.join('  \u00b7  '));
@@ -285,7 +285,7 @@ function useUlt() {
   if (boss) damageBoss(100 * (1 + .1 * bossKills));
 }
 function fire() {
-  const p = ship.position, dm = DMG_STEP ** nDmg;
+  const p = ship.position, dm = 1 + DMG_ADD * nDmg;
   const A = shots === 5 ? [0, .17, -.17, .34, -.34] : shots === 3 ? [0, .2, -.2] : [0];
   A.forEach((a, i) => {
     const m = new THREE.Mesh(bGeo, i ? bMatS : bMat); m.position.set(p.x + .9, p.y, 0); m.rotation.z = a; scene.add(m);
@@ -306,7 +306,7 @@ function update(dt) {
   ship.visible = invuln <= 0 || Math.floor(invuln * 10) % 2 === 0; shieldM.visible = shield;
   flame.scale.x = .8 + Math.random() * .5;
 
-  cd -= dt; if (cd <= 0) { cd = BASE_FIRE / RATE_STEP ** nRate; fire(); }
+  cd -= dt; if (cd <= 0) { cd = BASE_FIRE / (1 + RATE_ADD * nRate); fire(); }
 
   const diffS = 1.02 ** bossKills, diffN = 1.05 ** bossKills, base = (VW + 3) / 8 * diffS;
   spawnT -= dt;
