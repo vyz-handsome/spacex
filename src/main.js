@@ -101,8 +101,8 @@ ship.rotation.x = .35; scene.add(ship);
 
 // batu
 const TYPES = [
-  { hp: 1, r: .35, c: 0x8a8f99, pts: 10, w: 50, d: [['dmg', .30]] }, { hp: 2, r: .5, c: 0xb08968, pts: 25, w: 28, d: [['dmg', .30]] },
-  { hp: 4, r: .7, c: 0xe07a3f, pts: 50, w: 15, d: [['s3', .25]] }, { hp: 7, r: .95, c: 0xd62839, pts: 70, w: 7, d: [['s5', .10], ['rate', .40]] }
+  { hp: 1, r: .35, c: 0x8a8f99, pts: 10, w: 50, d: [['dmg', .03]] }, { hp: 2, r: .5, c: 0xb08968, pts: 25, w: 28, d: [['dmg', .03]] },
+  { hp: 4, r: .7, c: 0xe07a3f, pts: 50, w: 15, d: [['s3', .06]] }, { hp: 7, r: .95, c: 0xd62839, pts: 70, w: 7, d: [['s5', .03], ['rate', .10]] }
 ];
 const PUSHER = { hp: 5, r: .62, c: 0xb14dff, pts: 100, sp: true, d: [['shield', .03]] };
 const rockGeo = new THREE.IcosahedronGeometry(1, 1);
